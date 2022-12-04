@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
-        DomainDao dao = DaoFactory.getDAOInstance(DAOVariant.MySqlDao);
+        DomainDao dao = DaoFactory.getDAOInstance(DAOVariant.MongoDBDAO);
         boolean loop = true;
         while (loop) {
             try {
@@ -33,22 +33,33 @@ public class Main {
                     case 2:
                         System.out.println("Enter id of phone that will be deleted: ");
                         int id = scanner.nextInt();
-                        dao.deletePhone(id);
+                        dao.deletePhone(String.valueOf(id));
                         break;
                     case 3:
                         System.out.println("Enter the name of model of new phone: ");
                         String modelName = scanner.next();
-                        System.out.println("Enter id of processor, there are: ");
-                        for (Processor processor : dao.getProcessors()) {
-                            System.out.println(processor);
+                        System.out.println("Enter number of processor, there are: ");
+                        List<Processor> processors = dao.getProcessors();
+                        int i = 0;
+                        for (Processor processor : processors) {
+                            System.out.println(i++ + ": " + processor);
                         }
-                        int processorId = scanner.nextInt();
-                        System.out.println("Enter id of display, there are: ");
-                        for (Display display : dao.getDisplays()) {
-                            System.out.println(display);
+                        int processorNumber = scanner.nextInt();
+                        Processor processor = processors.get(processorNumber);
+                        System.out.println("Enter number of display, there are: ");
+                        List<Display> displays = dao.getDisplays();
+                        i = 0;
+                        for (Display display : displays) {
+                            System.out.println(i++ + ": " + display);
                         }
-                        int displayId = scanner.nextInt();
-                        dao.addPhone(modelName, processorId, displayId);
+                        int displayNumber = scanner.nextInt();
+                        Display display = displays.get(displayNumber);
+                        Phone resultPhone = new Phone.Builder()
+                                .setModel(modelName)
+                                .setProcessor(processor)
+                                .setDisplay(display)
+                                .build();
+                        dao.addPhone(resultPhone);
                         break;
                     case 4:
                         System.out.println("Enter id of phone that you want to edit: ");

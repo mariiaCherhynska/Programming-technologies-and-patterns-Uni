@@ -9,10 +9,9 @@ import java.util.List;
 public interface DomainDao {
 
     List<Phone> getPhones() throws Exception;
-    void deletePhone(int id) throws Exception;
+    public void deletePhone(String id) throws Exception;
 
-    void addPhone(String phoneModel, int processorCategoryId, int
-            displayId) throws Exception;
+    public void addPhone(Phone phone) throws Exception;
     void updatePhone(Phone phone) throws Exception;
     List<Phone> getPhonesByModel(String phoneModel) throws Exception;
     void addDisplay(int screenRefreshRate, String matrix_type) throws Exception;

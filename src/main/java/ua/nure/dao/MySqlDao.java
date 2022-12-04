@@ -36,15 +36,15 @@ public class MySqlDao implements DomainDao{
 
 
     @Override
-    public void addPhone(String phoneModel, int processorCategoryId, int displayId)
+    public void addPhone(Phone phone)
             throws Exception {
         try {
             int k = 1;
             PreparedStatement preparedStatement =
                     connection.prepareStatement(DaoConstants.addPhone);
-            preparedStatement.setString(k++,  phoneModel);
-            preparedStatement.setInt(k++, processorCategoryId);
-            preparedStatement.setInt(k++, displayId);
+            preparedStatement.setString(k++,  phone.getModel());
+            preparedStatement.setInt(k++, phone.getProcessor().getId());
+            preparedStatement.setInt(k++, phone.getDisplay().getId());
             preparedStatement.executeUpdate();
             connection.commit();
         } catch (Exception e) {
@@ -74,11 +74,11 @@ public class MySqlDao implements DomainDao{
     }
 
     @Override
-    public void deletePhone(int id) throws Exception {
+    public void deletePhone(String id) throws Exception {
         try {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(DaoConstants.deletePhone);
-            preparedStatement.setInt(1, id);
+            preparedStatement.setInt(1, Integer.parseInt(id));
             if (preparedStatement.executeUpdate() != 1) {
                 throw new Exception("Looks like nothing was updated");
             }

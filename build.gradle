@@ -13,7 +13,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
     implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.30'
-    implementation group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.0.1'
     implementation group: 'org.mongodb', name: 'mongodb-driver', version: '3.12.11'
 
 
