@@ -52,7 +52,7 @@ public class MongoDBDAO implements DomainDao {
 
     private Processor recordToProcessor(Document itemProcessor) throws Exception {
         return new Processor.Builder()
-                .setModel(itemProcessor.getString("model"))
+                .setModel(itemProcessor.getString("processor_model"))
                 .setCores(itemProcessor.getString("cores"))
                 .setFrequency(itemProcessor.getString("frequency"))
                 .build();
@@ -78,7 +78,7 @@ public class MongoDBDAO implements DomainDao {
 
         col.insertOne(new Document("model", phone.getModel())
                 .append("processor",
-                        new Document("model", phone.getProcessor().getModel())
+                        new Document("processor_model", phone.getProcessor().getModel())
                                 .append("cores", phone.getProcessor().getCores())
                                 .append("frequency", phone.getProcessor().getFrequency()))
                 .append("display",
@@ -94,7 +94,7 @@ public class MongoDBDAO implements DomainDao {
                 Filters.eq("_id", phone.getObjId()),
                 Updates.combine(
                         Updates.set("model", phone.getModel()),
-                        Updates.set("processor", new Document("model", phone.getProcessor().getModel())
+                        Updates.set("processor", new Document("processor_model", phone.getProcessor().getModel())
                                 .append("cores", phone.getProcessor().getCores())
                                 .append("frequency", phone.getProcessor().getFrequency())),
                         Updates.set("display", new Document("screen_refresh_rate", phone.getDisplay().getScreenRefreshRate())
@@ -135,7 +135,7 @@ public class MongoDBDAO implements DomainDao {
         MongoCollection<Document> col = database.getCollection(processorCollectionName);
 
         col.insertOne
-                (new Document("model", model)
+                (new Document("processor_model", model)
                         .append("cores", cores)
                         .append("frequency", frequency));
     }
@@ -170,4 +170,12 @@ public class MongoDBDAO implements DomainDao {
 
         return result;
     }
+
+    @Override
+    public void clearDB() throws Exception {
+        database.getCollection(phoneCollectionName).drop();
+        database.getCollection(displayCollectionName).drop();
+        database.getCollection(processorCollectionName).drop();
+    }
+
 }

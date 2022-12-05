@@ -13,6 +13,8 @@ public class MySqlDao implements DomainDao{
     private static MySqlDao instance;
     private Connection connection;
 
+    static private String truncateTable = "TRUNCATE TABLE ";
+
     public MySqlDao(String URL, String username, String password) throws
             Exception {
         if (instance == null) {
@@ -179,7 +181,7 @@ public class MySqlDao implements DomainDao{
     private Processor recordToProcessor(ResultSet queryResult) throws Exception {
         return new Processor.Builder()
                 .setId(queryResult.getInt("id_processor"))
-                .setModel(queryResult.getString("model"))
+                .setModel(queryResult.getString("processor_model"))
                 .setCores(queryResult.getString("cores"))
                 .setFrequency(queryResult.getString("frequency"))
                 .build();
@@ -204,4 +206,20 @@ public class MySqlDao implements DomainDao{
                 .setDisplay(currentDisplay)
                 .build();
     }
+    @Override
+    public void clearDB() throws Exception {
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
+        statement = connection.createStatement();
+        statement.executeUpdate(truncateTable + "phone");
+        statement = connection.createStatement();
+        statement.executeUpdate(truncateTable + "display");
+        statement = connection.createStatement();
+        statement.executeUpdate(truncateTable + "processor");
+        statement = connection.createStatement();
+        statement.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
+        connection.commit();
+    }
+
+
 }

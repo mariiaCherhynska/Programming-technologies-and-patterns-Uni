@@ -19,4 +19,6 @@ public interface DomainDao {
     public List<Display> getDisplays() throws Exception;
     public List<Processor> getProcessors() throws Exception;
     public List<Phone> getPhonesById(int id) throws Exception;
+
+    public void clearDB() throws Exception;
 }
