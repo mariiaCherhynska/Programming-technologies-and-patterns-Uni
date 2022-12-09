@@ -1,8 +1,6 @@
 package ua.nure.dao;
 
-import ua.nure.dao.entetity.Display;
-import ua.nure.dao.entetity.Phone;
-import ua.nure.dao.entetity.Processor;
+import ua.nure.dao.entetity.*;
 import ua.nure.observer.EventManager;
 import ua.nure.observer.IListener;
 
@@ -63,6 +61,45 @@ public class MySqlDao implements DomainDao{
     @Override
     public void unsubscribeOnPhoneUpdated(IListener<Phone> listener) {
         onPhoneUpdated.unsubscribe(listener);
+    }
+
+    @Override
+    public User authorize(String username) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(DaoConstants.userAuthorize);
+        preparedStatement.setString(1, username);
+        ResultSet queryResult = preparedStatement.executeQuery();
+
+        if (queryResult.next()) {
+            return recordToUser(queryResult);
+        } else {
+            throw new IllegalAccessError("User not found");
+        }
+
+    }
+
+    @Override
+    public void registerUser(User user) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(DaoConstants.registerUser);
+        preparedStatement.setString(1, user.getUserName());
+        preparedStatement.setString(2, user.getRole().getRole());
+
+        preparedStatement.executeUpdate();
+        connection.commit();
+
+    }
+
+    @Override
+    public List<Role> getUserRoles() throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(DaoConstants.getRoles);
+        ResultSet queryResult = preparedStatement.executeQuery();
+
+        List<Role> result = new ArrayList<>();
+
+        while (queryResult.next()) {
+            result.add(recordToRole(queryResult));
+        }
+        return result;
+
     }
 
 
@@ -256,4 +293,20 @@ public class MySqlDao implements DomainDao{
                 .setDisplay(currentDisplay)
                 .build();
     }
+
+    private Role recordToRole(ResultSet queryResult) throws SQLException {
+        return new Role.Builder()
+                .setRole(queryResult.getString("role"))
+                .setId(queryResult.getInt("id_role"))
+                .build();
+    }
+
+    private User recordToUser(ResultSet queryResult) throws SQLException {
+        return new User.Builder()
+                .setRole(recordToRole(queryResult))
+                .setUserName(queryResult.getString("username"))
+                .setId(queryResult.getInt("id_user"))
+                .build();
+    }
+
 }

@@ -35,5 +35,17 @@ public class DaoConstants {
     public static String addProcessor = "insert into processor(model, cores, frequency) values(?, ?, ?);";
     public static String getProcessor = "SELECT processor.id id_processor, processor.processor_model, processor.cores , processor.frequency FROM processor;";
 
+    static public String getRoles = "SELECT * FROM `role`;";
 
+    static public String registerUser = """
+            INSERT INTO `user` (username, role_id)
+            VALUES (?, (SELECT `id` FROM `role` WHERE
+            `role` = ?));
+            """;
+    static public String userAuthorize = """
+            SELECT `user`.id id_user, user.username, user.role_id, role.id id_role, role.role FROM `user`\s
+            INNER JOIN `role`\s
+            ON `user`.`role_id` = `role`.`id`
+            WHERE `user`.`username` = ?;
+            """;
 }

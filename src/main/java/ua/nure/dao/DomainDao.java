@@ -1,10 +1,9 @@
 package ua.nure.dao;
 
-import ua.nure.dao.entetity.Display;
-import ua.nure.dao.entetity.Phone;
-import ua.nure.dao.entetity.Processor;
+import ua.nure.dao.entetity.*;
 import ua.nure.observer.IListener;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface DomainDao {
@@ -15,6 +14,11 @@ public interface DomainDao {
      void unsubscribeOnPhoneDeleted(IListener<Integer> listener);
      void subscribeOnPhoneUpdated(IListener<Phone> listener);
      void unsubscribeOnPhoneUpdated(IListener<Phone> listener);
+
+    public User authorize(String userName) throws SQLException;
+    public void registerUser(User user) throws SQLException;
+    public List<Role> getUserRoles() throws SQLException;
+
 
 
     List<Phone> getPhones() throws Exception;
