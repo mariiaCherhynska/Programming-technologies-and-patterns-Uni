@@ -83,4 +83,12 @@ public class Processor {
             return new Processor(id, model, cores, frequency);
         }
     }
+    public Processor clone() {
+        return new Builder()
+                .setId(id)
+                .setModel(model)
+                .setCores(cores)
+                .setFrequency(frequency)
+                .build();
+    }
 }

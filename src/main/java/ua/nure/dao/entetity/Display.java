@@ -72,4 +72,12 @@ public class Display {
             return new Display(id, screenRefreshRate, matrixType);
         }
     }
+    public Display clone() {
+        return new Display.Builder()
+                .setId(id)
+                .setScreenRefreshRate(screenRefreshRate)
+                .setMatrixType(matrixType)
+                .build();
+    }
+
 }

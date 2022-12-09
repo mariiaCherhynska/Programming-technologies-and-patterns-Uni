@@ -90,4 +90,12 @@ public class Phone {
         }
 
     }
+    public Phone clone() {
+        return new Phone.Builder().setId(id)
+                .setModel(model)
+                .setProcessor(processor.clone())
+                .setDisplay(display.clone())
+                .build();
+    }
+
 }
