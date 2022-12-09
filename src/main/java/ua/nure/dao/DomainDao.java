@@ -3,10 +3,19 @@ package ua.nure.dao;
 import ua.nure.dao.entetity.Display;
 import ua.nure.dao.entetity.Phone;
 import ua.nure.dao.entetity.Processor;
+import ua.nure.observer.IListener;
 
 import java.util.List;
 
 public interface DomainDao {
+
+     void subscribeOnPhoneAdded(IListener<Phone> listener);
+     void unsubscribeOnPhoneAdded(IListener<Phone> listener);
+     void subscribeOnPhoneDeleted(IListener<Integer> listener);
+     void unsubscribeOnPhoneDeleted(IListener<Integer> listener);
+     void subscribeOnPhoneUpdated(IListener<Phone> listener);
+     void unsubscribeOnPhoneUpdated(IListener<Phone> listener);
+
 
     List<Phone> getPhones() throws Exception;
     void deletePhone(int id) throws Exception;

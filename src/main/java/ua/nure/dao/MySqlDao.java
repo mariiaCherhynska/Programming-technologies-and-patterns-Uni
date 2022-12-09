@@ -3,6 +3,8 @@ package ua.nure.dao;
 import ua.nure.dao.entetity.Display;
 import ua.nure.dao.entetity.Phone;
 import ua.nure.dao.entetity.Processor;
+import ua.nure.observer.EventManager;
+import ua.nure.observer.IListener;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,15 +15,56 @@ public class MySqlDao implements DomainDao{
     private static MySqlDao instance;
     private Connection connection;
 
+    public EventManager<Phone> onPhoneAdded;
+    public EventManager<Phone> onPhoneUpdated;
+    public EventManager<Integer> onPhoneDeleted;
+
+
+
     public MySqlDao(String URL, String username, String password) throws
             Exception {
         if (instance == null) {
             connection = DriverManager.getConnection(URL, username,
                     password);
             connection.setAutoCommit(false);
+            onPhoneAdded = new EventManager<>();
+            onPhoneUpdated = new EventManager<>();
+            onPhoneDeleted = new EventManager<>();
+
             instance = this;
         }
     }
+
+    @Override
+    public void subscribeOnPhoneAdded(IListener<Phone> listener) {
+        onPhoneAdded.subscribe(listener);
+    }
+
+    @Override
+    public void unsubscribeOnPhoneAdded(IListener<Phone> listener) {
+        onPhoneAdded.unsubscribe(listener);
+    }
+
+    @Override
+    public void subscribeOnPhoneDeleted(IListener<Integer> listener) {
+        onPhoneDeleted.subscribe(listener);
+    }
+
+    @Override
+    public void unsubscribeOnPhoneDeleted(IListener<Integer> listener) {
+        onPhoneDeleted.unsubscribe(listener);
+    }
+
+    @Override
+    public void subscribeOnPhoneUpdated(IListener<Phone> listener) {
+        onPhoneUpdated.subscribe(listener);
+    }
+
+    @Override
+    public void unsubscribeOnPhoneUpdated(IListener<Phone> listener) {
+        onPhoneUpdated.unsubscribe(listener);
+    }
+
 
     @Override
     public List<Phone> getPhones() throws Exception {
@@ -47,6 +90,13 @@ public class MySqlDao implements DomainDao{
             preparedStatement.setInt(k++, displayId);
             preparedStatement.executeUpdate();
             connection.commit();
+            onPhoneAdded.update(new Phone.Builder().setModel(phoneModel)
+                    .setProcessor(
+                    new Processor.Builder().setId(processorCategoryId).build())
+                    .setDisplay(new Display.Builder().setId(displayId).build())
+                    .build()
+            );
+
         } catch (Exception e) {
             connection.rollback();
             throw e;
@@ -66,6 +116,7 @@ public class MySqlDao implements DomainDao{
             preparedStatement.setInt(k++, phone.getId());
             preparedStatement.executeUpdate();
             connection.commit();
+            onPhoneUpdated.update(phone);
         } catch (Exception e) {
             connection.rollback();
             throw e;
@@ -83,6 +134,7 @@ public class MySqlDao implements DomainDao{
                 throw new Exception("Looks like nothing was updated");
             }
             connection.commit();
+            onPhoneDeleted.update(id);
         } catch (Exception e) {
             connection.rollback();
             throw e;
@@ -179,7 +231,7 @@ public class MySqlDao implements DomainDao{
     private Processor recordToProcessor(ResultSet queryResult) throws Exception {
         return new Processor.Builder()
                 .setId(queryResult.getInt("id_processor"))
-                .setModel(queryResult.getString("model"))
+                .setModel(queryResult.getString("processor_model"))
                 .setCores(queryResult.getString("cores"))
                 .setFrequency(queryResult.getString("frequency"))
                 .build();

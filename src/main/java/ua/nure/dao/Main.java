@@ -3,6 +3,10 @@ package ua.nure.dao;
 import ua.nure.dao.entetity.Display;
 import ua.nure.dao.entetity.Phone;
 import ua.nure.dao.entetity.Processor;
+import ua.nure.observer.IListener;
+import ua.nure.observer.OnPhoneAddedListener;
+import ua.nure.observer.OnPhoneDeletedListener;
+import ua.nure.observer.OnPhoneUpdatedListener;
 
 import java.util.List;
 import java.util.Scanner;
@@ -11,6 +15,11 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
         DomainDao dao = DaoFactory.getDAOInstance(DAOVariant.MySqlDao);
+        dao.subscribeOnPhoneAdded(new OnPhoneAddedListener());
+        dao.subscribeOnPhoneDeleted(new OnPhoneDeletedListener());
+        dao.subscribeOnPhoneUpdated(new OnPhoneUpdatedListener());
+        dao.subscribeOnPhoneUpdated(data -> System.out.println("Phone has been updated: " + data));
+
         boolean loop = true;
         while (loop) {
             try {
