@@ -1,5 +1,8 @@
-package ua.nure.dao;
+package ua.nure;
 
+import ua.nure.dao.DAOVariant;
+import ua.nure.dao.DaoFactory;
+import ua.nure.dao.DomainDao;
 import ua.nure.dao.entetity.Display;
 import ua.nure.dao.entetity.Phone;
 import ua.nure.dao.entetity.Processor;

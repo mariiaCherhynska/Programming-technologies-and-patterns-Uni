@@ -8,64 +8,28 @@ import java.util.List;
 
 public class Lab4 {
     public static void main(String[] args) throws Exception {
-      //migrateMySQLToMongo(DaoFactory.getDAOInstance(DAOVariant.MongoDBDAO), DaoFactory.getDAOInstance(DAOVariant.MySqlDao));
-    migrateMongoToMySQL(DaoFactory.getDAOInstance(DAOVariant.MongoDBDAO), DaoFactory.getDAOInstance(DAOVariant.MySqlDao));
-}
+        DomainDao dao = DaoFactory.getDAOInstance(DAOVariant.MongoDBDAO);
+        dao.clearDB();
+        int amount = 10000;
 
-        public static void migrateMongoToMySQL(DomainDao mongo, DomainDao mySQL) throws Exception {
-            mySQL.clearDB();
-
-            List<Display> displays = mongo.getDisplays();
-            List<Processor> processors = mongo.getProcessors();
-
-            for (Display display: displays) {
-                mySQL.addDisplay(display.getScreenRefreshRate(), display.getMatrixType());
-            }
-
-            for (Processor processor: processors) {
-                mySQL.addProcessor(processor.getModel(), processor.getCores(), processor.getFrequency());
-            }
-
-            displays = mySQL.getDisplays();
-            processors = mySQL.getProcessors();
-
-            List<Phone> phones = mongo.getPhones();
-
-            for (Phone phone: phones) {
-                phone.setProcessor(
-                        processors.stream().filter(processor ->
-                                processor.getModel().equals(phone.getProcessor().getModel())).findFirst().get()
-                );
-
-                phone.setDisplay(
-                        displays.stream().filter(display
-                                -> display.getMatrixType().equals(phone.getDisplay().getMatrixType())).findFirst().get()
-                );
-
-                mySQL.addPhone(phone);
-            }
+        for (int i = 0; i < amount; i++) {
+            dao.addPhone(
+                    new Phone.Builder()
+                            .setModel("testModel")
+                            .setDisplay(new Display.Builder()
+                                    .setScreenRefreshRate(100)
+                                    .setMatrixType("matrixType")
+                                    .build())
+                            .setProcessor(new Processor.Builder()
+                                    .setFrequency("90")
+                                    .setCores("4")
+                                    .setModel("processor model")
+                                    .build())
+                            .build()
+            );
         }
 
-        public static void migrateMySQLToMongo(DomainDao mongo, DomainDao mySQL) throws Exception {
-            mongo.clearDB();
-
-            List<Display> displays = mySQL.getDisplays();
-            List<Processor> processors = mySQL.getProcessors();
-            for (Display display: displays) {
-                mongo.addDisplay(display.getScreenRefreshRate(), display.getMatrixType());
-            }
-
-            for (Processor processor: processors) {
-                mongo.addProcessor(processor.getModel(), processor.getCores(), processor.getFrequency());
-            }
-
-            List<Phone> phones = mySQL.getPhones();
-
-            System.out.println(phones);
-
-            for (Phone phone: phones) {
-                mongo.addPhone(phone);
-            }
-        }
+        List<Phone> phones = dao.getPhonesByModel("testModel");
+        System.out.println("Read " + phones.size() + " documents");
+    }
 }
-
