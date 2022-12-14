@@ -6,6 +6,7 @@ import ua.nure.dao.entetity.Processor;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MySqlDao implements DomainDao{
@@ -221,5 +222,28 @@ public class MySqlDao implements DomainDao{
         connection.commit();
     }
 
+    @Override
+    public HashMap<String, Integer> getDisplaysAmount(String matrix_type) {
+        return null;
+    }
 
+    @Override
+    public HashMap<String, Integer> getProcessorsAmount(String model) throws Exception {
+        return null;
+    }
+
+    @Override
+    public List<Phone> getPhonesByModelProcessorAndDisplayMatrixType(String processorModel, String matrixType) throws Exception {
+        return null;
+    }
+
+    @Override
+    public List<Phone> getPhonesByModelWithPaging(String model, int from, int to) throws Exception {
+        return null;
+    }
+
+    @Override
+    public Display getTopDisplay() throws Exception {
+        return null;
+    }
 }

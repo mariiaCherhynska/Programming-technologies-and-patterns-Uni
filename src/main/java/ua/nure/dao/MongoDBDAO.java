@@ -1,8 +1,7 @@
 package ua.nure.dao;
 
 import com.mongodb.client.*;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import ua.nure.dao.entetity.Display;
@@ -10,6 +9,8 @@ import ua.nure.dao.entetity.Phone;
 import ua.nure.dao.entetity.Processor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class MongoDBDAO implements DomainDao {
@@ -178,4 +179,130 @@ public class MongoDBDAO implements DomainDao {
         database.getCollection(processorCollectionName).drop();
     }
 
+    @Override
+    public HashMap<String, Integer> getDisplaysAmount(String processorModel) {
+        AggregateIterable<Document> fi = database.getCollection(phoneCollectionName).aggregate(
+                Arrays.asList(
+                        Aggregates.match(Filters.eq("processor.processor_model", processorModel)),
+                        Aggregates.project(Filters.and(
+                                        Projections.include("model"),
+                                        Projections.computed("display_matrix_type", "$display.matrix_type"),
+                                        Projections.computed("amnt", new Document("$add", 1))
+                                )
+                        ),
+                        Aggregates.group(
+                                "$display_matrix_type", Accumulators.sum("amnt", "$amnt")
+                        )
+                )
+        );
+
+        MongoCursor<Document> cursor = fi.iterator();
+        HashMap<String, Integer> result = new HashMap<>();
+
+        while(cursor.hasNext()) {
+            Document item = cursor.next();
+            result.put(item.getString("_id"), item.getInteger("amnt"));
+        }
+        cursor.close();
+        return result;
+    }
+
+    @Override
+    public HashMap<String, Integer> getProcessorsAmount(String displayMatrixType) throws Exception {
+        AggregateIterable<Document> fi = database.getCollection(phoneCollectionName).aggregate(
+                Arrays.asList(
+                        Aggregates.match(Filters.eq("display.matrix_type", displayMatrixType)),
+                        Aggregates.project(Filters.and(
+                                        Projections.include("model"),
+                                        Projections.computed("processor_model", "$processor.processor_model"),
+                                        Projections.computed("amnt", new Document("$add", 1))
+                                )
+                        ),
+                        Aggregates.group(
+                                "$processor_model", Accumulators.sum("amnt", "$amnt")
+                        )
+                )
+        );
+
+        MongoCursor<Document> cursor = fi.iterator();
+        HashMap<String, Integer> result = new HashMap<>();
+
+        while(cursor.hasNext()) {
+            Document item = cursor.next();
+            result.put(item.getString("_id"), item.getInteger("amnt"));
+        }
+        cursor.close();
+        return result;
+    }
+
+    @Override
+    public List<Phone> getPhonesByModelProcessorAndDisplayMatrixType(
+            String processorModel,
+            String matrixType)
+            throws Exception {
+
+        AggregateIterable<Document> fi = database.getCollection(phoneCollectionName).aggregate(
+                Arrays.asList(
+                        Aggregates.match(Filters.and(
+                                Filters.eq("display.matrix_type", matrixType),
+                                Filters.eq("processor.processor_model", processorModel)
+                        ))
+                )
+        );
+        MongoCursor<Document> cursor = fi.iterator();
+
+        List<Phone> phones = new ArrayList<>();
+
+        while(cursor.hasNext()) {
+            phones.add(recordToPhone(cursor.next()));
+        }
+        cursor.close();
+        return phones;
+    }
+
+    @Override
+    public List<Phone> getPhonesByModelWithPaging(String model, int from, int to) throws Exception {
+        AggregateIterable<Document> fi = database.getCollection(phoneCollectionName).aggregate(
+                Arrays.asList(
+                        Aggregates.match(Filters.and(
+                                Filters.regex("model", "/"+model+"/")
+                        )),
+                        Aggregates.skip(from),
+                        Aggregates.limit(to-from)
+                )
+        );
+        MongoCursor<Document> cursor = fi.iterator();
+        List<Phone> phones = new ArrayList<>();
+        while(cursor.hasNext()) {
+            System.out.println("in while");
+            phones.add(recordToPhone(cursor.next()));
+        }
+        cursor.close();
+        return phones;
+    }
+
+    @Override
+    public Display getTopDisplay() throws Exception {
+        AggregateIterable<Document> fi =
+                database.getCollection(phoneCollectionName).aggregate(
+                        Arrays.asList(
+                                Aggregates.project(Filters.and(
+                                                Projections.include("display"),
+                                                Projections.computed("amnt", new
+                                                        Document("$add", 1))
+                                        )
+                                ),
+                                Aggregates.group(
+                                        "$display", Accumulators.sum("amnt", "$amnt")
+                                ),
+                                Aggregates.sort(new Document("amnt", -1)),
+                                Aggregates.limit(1)
+                        )
+                );
+        MongoCursor<Document> cursor = fi.iterator();
+        Display result = recordToDisplay((Document)
+                cursor.next().get("_id"));
+        cursor.close();
+        return result;
+    }
 }
